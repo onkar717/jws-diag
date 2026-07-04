@@ -32,10 +32,10 @@ public class SummaryHumanFormatter {
         sb.append(tomcat).append(jws).append('\n');
 
         sb.append("CATALINA_HOME: ")
-                .append(installation.getCatalinaHome() != null ? installation.getCatalinaHome() : "N/A")
+                .append(installation.getCatalinaHome() != null ? toUnixPath(installation.getCatalinaHome()) : "N/A")
                 .append('\n');
         sb.append("CATALINA_BASE: ")
-                .append(installation.getCatalinaBase() != null ? installation.getCatalinaBase() : "N/A")
+                .append(installation.getCatalinaBase() != null ? toUnixPath(installation.getCatalinaBase()) : "N/A")
                 .append('\n');
 
         sb.append("JVM: ").append(formatJvm(installation.getJvmInfo()))
@@ -54,6 +54,10 @@ public class SummaryHumanFormatter {
         }
 
         return sb.toString().stripTrailing();
+    }
+
+    private static String toUnixPath(java.nio.file.Path path) {
+        return path.toString().replace('\\', '/');
     }
 
     private static String formatJvm(JvmInfo jvm) {

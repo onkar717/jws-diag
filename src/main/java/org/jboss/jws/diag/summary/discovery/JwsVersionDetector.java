@@ -37,7 +37,7 @@ class JwsVersionDetector {
             return null;
         }
 
-        Matcher m = JWS_PATH_PATTERN.matcher(catalinaHome.toString());
+        Matcher m = JWS_PATH_PATTERN.matcher(catalinaHome.toString().replace('\\', '/'));
         if (m.find()) {
             return m.group(1);
         }
