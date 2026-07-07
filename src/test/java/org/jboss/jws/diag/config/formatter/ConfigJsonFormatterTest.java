@@ -95,7 +95,7 @@ class ConfigJsonFormatterTest {
                 .get("services").get(0).get("connectors").get(0);
         assertThat(connector.has("executorRef")).isFalse();
         assertThat(connector.has("proxyName")).isFalse();
-        assertThat(connector.has("ssl")).isFalse();
+        assertThat(connector.has("sslHostConfigs")).isFalse();
         assertThat(connector.has("secretRequired")).isFalse();
     }
 

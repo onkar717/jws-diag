@@ -70,7 +70,17 @@ public class ConfigCommand implements Runnable {
     }
 
     private Path resolveBase() {
-        if (catalinaBase != null) return catalinaBase;
+        if (catalinaBase != null) {
+            if (!Files.isDirectory(catalinaBase)) {
+                System.err.println("ERROR: --catalina-base is not a valid directory: " + catalinaBase);
+                System.exit(ExitCodes.ERRORS);
+            }
+            return catalinaBase;
+        }
+        if (catalinaHome != null && !Files.isDirectory(catalinaHome)) {
+            System.err.println("ERROR: --catalina-home is not a valid directory: " + catalinaHome);
+            System.exit(ExitCodes.ERRORS);
+        }
         CatalinaDiscovery.Result result = CatalinaDiscovery.create(catalinaHome, null).discover();
         return result.getCatalinaBase();
     }
