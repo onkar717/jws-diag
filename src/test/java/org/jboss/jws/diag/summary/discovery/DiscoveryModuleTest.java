@@ -161,4 +161,34 @@ class DiscoveryModuleTest {
         assertThat(result.getTomcatVersion()).isNull();
         assertThat(result.getJwsVersion()).isNull();
     }
+
+    @Test
+    void populatesNativeInfoWhenAprListenerInServerXml() throws IOException {
+        Path home = tempDir.resolve("native-home");
+        Path lib = home.resolve("lib");
+        Files.createDirectories(lib);
+        Files.createDirectories(home.resolve("conf"));
+        Files.writeString(home.resolve("conf/server.xml"),
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                        + "<Server port=\"8005\" shutdown=\"SHUTDOWN\">\n"
+                        + "  <Listener className=\"org.apache.catalina.core.AprLifecycleListener\"/>\n"
+                        + "</Server>\n");
+        Files.createFile(lib.resolve("catalina.jar"));
+        Files.createFile(lib.resolve("tomcat-native-1.2.35-jni.jar"));
+
+        JwsInstallation result = module(home, Map.of(), Map.of(), tempDir.resolve("no-proc")).discover();
+
+        assertThat(result.getNativeInfo()).isNotNull();
+        assertThat(result.getNativeInfo().isLoaded()).isTrue();
+        assertThat(result.getNativeInfo().getAprVersion()).isEqualTo("1.2.35");
+    }
+
+    @Test
+    void nativeInfoIsNull_whenNoNativeListener() throws IOException {
+        Path home = validTomcatHome("no-native-home");
+
+        JwsInstallation result = module(home, Map.of(), Map.of(), tempDir.resolve("no-proc")).discover();
+
+        assertThat(result.getNativeInfo()).isNull();
+    }
 }

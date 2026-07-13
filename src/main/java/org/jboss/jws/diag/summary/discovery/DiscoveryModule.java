@@ -3,6 +3,7 @@ package org.jboss.jws.diag.summary.discovery;
 import org.jboss.jws.diag.summary.model.ContainerInfo;
 import org.jboss.jws.diag.summary.model.JvmInfo;
 import org.jboss.jws.diag.summary.model.JwsInstallation;
+import org.jboss.jws.diag.summary.model.NativeInfo;
 import org.jboss.jws.diag.summary.model.OsInfo;
 
 import java.nio.file.Path;
@@ -56,6 +57,8 @@ public class DiscoveryModule {
 
         String tomcatVersion = new TomcatVersionDetector(catalinaHome).detect();
         String jwsVersion    = new JwsVersionDetector(catalinaHome).detect();
+        NativeInfo nativeInfo =
+                new NativeLibDetector(catalinaHome, catalina.getCatalinaBase()).detect();
 
         return JwsInstallation.builder()
                 .catalinaHome(catalinaHome)
@@ -65,6 +68,7 @@ public class DiscoveryModule {
                 .jvmInfo(jvm)
                 .osInfo(os)
                 .containerInfo(container)
+                .nativeInfo(nativeInfo)
                 .pid(catalina.getPid())
                 .build();
     }
