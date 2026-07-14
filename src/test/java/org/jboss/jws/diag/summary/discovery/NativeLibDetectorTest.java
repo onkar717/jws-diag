@@ -64,25 +64,26 @@ class NativeLibDetectorTest {
     }
 
     @Test
-    void returnsLoaded_whenAprLifecycleListenerPresent() throws IOException {
+    void returnsNativeInfo_whenAprLifecycleListenerPresent() throws IOException {
         Path home = buildHome();
         writeServerXml(home, serverXmlWith(NativeLibDetector.APR_LISTENER));
 
         NativeInfo result = new NativeLibDetector(home, home).detect();
 
         assertThat(result).isNotNull();
-        assertThat(result.isLoaded()).isTrue();
+        // loaded is null: listener presence means "configured", not confirmed loaded at runtime
+        assertThat(result.isLoaded()).isNull();
     }
 
     @Test
-    void returnsLoaded_whenOpenSslLifecycleListenerPresent() throws IOException {
+    void returnsNativeInfo_whenOpenSslLifecycleListenerPresent() throws IOException {
         Path home = buildHome();
         writeServerXml(home, serverXmlWith(NativeLibDetector.OPENSSL_LISTENER));
 
         NativeInfo result = new NativeLibDetector(home, home).detect();
 
         assertThat(result).isNotNull();
-        assertThat(result.isLoaded()).isTrue();
+        assertThat(result.isLoaded()).isNull();
     }
 
     @Test
@@ -106,7 +107,32 @@ class NativeLibDetectorTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getAprVersion()).isEqualTo("1.2.35");
-        assertThat(result.isLoaded()).isTrue();
+    }
+
+    @Test
+    void picksHighestAprVersion_whenMultipleNativeJarsExist() throws IOException {
+        Path home = buildHome();
+        writeServerXml(home, serverXmlWith(NativeLibDetector.APR_LISTENER));
+        Files.createFile(home.resolve("lib/tomcat-native-1.2.35-jni.jar"));
+        Files.createFile(home.resolve("lib/tomcat-native-1.2.40-jni.jar"));
+        Files.createFile(home.resolve("lib/tomcat-native-1.3.0-jni.jar"));
+
+        NativeInfo result = new NativeLibDetector(home, home).detect();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getAprVersion()).isEqualTo("1.3.0");
+    }
+
+    @Test
+    void extractsOpensslVersion_fromOpensslJar() throws IOException {
+        Path home = buildHome();
+        writeServerXml(home, serverXmlWith(NativeLibDetector.APR_LISTENER));
+        Files.createFile(home.resolve("lib/openssl-3.0.9.jar"));
+
+        NativeInfo result = new NativeLibDetector(home, home).detect();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getOpensslVersion()).isEqualTo("3.0.9");
     }
 
     @Test
@@ -120,7 +146,7 @@ class NativeLibDetectorTest {
         NativeInfo result = new NativeLibDetector(home, base).detect();
 
         assertThat(result).isNotNull();
-        assertThat(result.isLoaded()).isTrue();
+        assertThat(result.isLoaded()).isNull();
     }
 
     @Test

@@ -179,7 +179,7 @@ class DiscoveryModuleTest {
         JwsInstallation result = module(home, Map.of(), Map.of(), tempDir.resolve("no-proc")).discover();
 
         assertThat(result.getNativeInfo()).isNotNull();
-        assertThat(result.getNativeInfo().isLoaded()).isTrue();
+        assertThat(result.getNativeInfo().isLoaded()).isNull();
         assertThat(result.getNativeInfo().getAprVersion()).isEqualTo("1.2.35");
     }
 
