@@ -11,6 +11,7 @@ import org.jboss.jws.diag.config.model.ServerConfig;
 import org.jboss.jws.diag.config.model.ServiceConfig;
 import org.jboss.jws.diag.config.model.SslHostConfig;
 import org.jboss.jws.diag.config.model.ValveConfig;
+import org.jboss.jws.diag.config.model.ValveType;
 
 import java.util.List;
 import java.util.Map;
@@ -164,7 +165,11 @@ public class ConfigHumanFormatter {
     }
 
     private void appendValve(StringBuilder sb, ValveConfig valve, String prefix) {
-        sb.append(prefix).append("Valve: ").append(valve.getClassName()).append('\n');
+        ValveType type = ValveType.fromClassName(valve.getClassName());
+        String label = type != ValveType.UNKNOWN
+                ? type.getLabel() + " [" + valve.getClassName() + "]"
+                : valve.getClassName();
+        sb.append(prefix).append("Valve: ").append(label).append('\n');
         Map<String, String> attrs = valve.getAttributes();
         if (attrs != null && !attrs.isEmpty()) {
             String ind = prefix + INDENT;

@@ -43,6 +43,14 @@
         "value" : 4,
         "explicit" : true
       },
+      "threadPriority" : {
+        "value" : 5,
+        "explicit" : false
+      },
+      "maxIdleTime" : {
+        "value" : 60000,
+        "explicit" : false
+      },
       "namePrefix" : "catalina-exec-"
     } ],
     "engine" : {

@@ -149,6 +149,18 @@ public final class ServerXmlParser {
             catch (NumberFormatException ignored) { }
         }
 
+        String threadPriority = attr(el, "threadPriority", null);
+        if (threadPriority != null) {
+            try { b.threadPriority(ConfigValue.explicit(Integer.parseInt(threadPriority))); }
+            catch (NumberFormatException ignored) { }
+        }
+
+        String maxIdleTime = attr(el, "maxIdleTime", null);
+        if (maxIdleTime != null) {
+            try { b.maxIdleTime(ConfigValue.explicit(Integer.parseInt(maxIdleTime))); }
+            catch (NumberFormatException ignored) { }
+        }
+
         TomcatDefaults.applyExecutorDefaults(b);
         return b.build();
     }

@@ -27,6 +27,8 @@ public final class TomcatDefaults {
 
     public static final int    EXECUTOR_MAX_THREADS        = 200;
     public static final int    EXECUTOR_MIN_SPARE_THREADS  = 10;
+    public static final int    EXECUTOR_THREAD_PRIORITY    = 5;
+    public static final int    EXECUTOR_MAX_IDLE_TIME      = 60000;
 
     public static final String CERTIFICATE_KEYSTORE_TYPE   = "JKS";
 
@@ -70,6 +72,10 @@ public final class TomcatDefaults {
             b.maxThreads(ConfigValue.defaulted(EXECUTOR_MAX_THREADS));
         if (b.getMinSpareThreads() == null)
             b.minSpareThreads(ConfigValue.defaulted(EXECUTOR_MIN_SPARE_THREADS));
+        if (b.getThreadPriority() == null)
+            b.threadPriority(ConfigValue.defaulted(EXECUTOR_THREAD_PRIORITY));
+        if (b.getMaxIdleTime() == null)
+            b.maxIdleTime(ConfigValue.defaulted(EXECUTOR_MAX_IDLE_TIME));
     }
 
     public static void applyCertificateDefaults(CertificateConfig.Builder b) {

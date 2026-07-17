@@ -7,6 +7,7 @@ import org.jboss.jws.diag.config.model.HostConfig;
 import org.jboss.jws.diag.config.model.ServerConfig;
 import org.jboss.jws.diag.config.model.ServiceConfig;
 import org.jboss.jws.diag.config.model.ValveConfig;
+import org.jboss.jws.diag.config.model.ValveType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -212,6 +213,20 @@ class ServerXmlParserTest {
         assertThat(exec.getMaxThreads().isExplicit()).isTrue();
         assertThat(exec.getMinSpareThreads().getValue()).isEqualTo(4);
         assertThat(exec.getMinSpareThreads().isExplicit()).isTrue();
+        // threadPriority and maxIdleTime not in fixture — should be defaulted
+        assertThat(exec.getThreadPriority().getValue()).isEqualTo(5);
+        assertThat(exec.getThreadPriority().isExplicit()).isFalse();
+        assertThat(exec.getMaxIdleTime().getValue()).isEqualTo(60000);
+        assertThat(exec.getMaxIdleTime().isExplicit()).isFalse();
+    }
+
+    @Test
+    void valveTypesResolvedFromClassName() throws IOException {
+        HostConfig host = parser.parse(fixture("server-proxy-valve.xml"))
+                .getServices().get(0).getEngine().getHosts().get(0);
+        assertThat(host.getValves()).hasSize(2);
+        assertThat(host.getValves().get(0).getValveType()).isEqualTo(ValveType.ACCESS_LOG);
+        assertThat(host.getValves().get(1).getValveType()).isEqualTo(ValveType.REMOTE_IP);
     }
 
     @Test

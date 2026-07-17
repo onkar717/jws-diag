@@ -101,6 +101,12 @@ class TomcatDefaultsTest {
 
         assertThat(e.getMinSpareThreads().getValue()).isEqualTo(10);
         assertThat(e.getMinSpareThreads().isExplicit()).isFalse();
+
+        assertThat(e.getThreadPriority().getValue()).isEqualTo(5);
+        assertThat(e.getThreadPriority().isExplicit()).isFalse();
+
+        assertThat(e.getMaxIdleTime().getValue()).isEqualTo(60000);
+        assertThat(e.getMaxIdleTime().isExplicit()).isFalse();
     }
 
     @Test

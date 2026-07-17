@@ -229,7 +229,7 @@ class ConfigHumanFormatterTest {
                 .build();
         String output = formatter.format(config);
 
-        assertThat(output).contains("Valve: org.apache.catalina.valves.AccessLogValve");
+        assertThat(output).contains("Valve: AccessLog [org.apache.catalina.valves.AccessLogValve]");
         assertThat(output).contains("directory: logs");
     }
 
