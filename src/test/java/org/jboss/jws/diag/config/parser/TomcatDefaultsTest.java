@@ -99,7 +99,7 @@ class TomcatDefaultsTest {
         assertThat(e.getMaxThreads().getValue()).isEqualTo(200);
         assertThat(e.getMaxThreads().isExplicit()).isFalse();
 
-        assertThat(e.getMinSpareThreads().getValue()).isEqualTo(10);
+        assertThat(e.getMinSpareThreads().getValue()).isEqualTo(25);
         assertThat(e.getMinSpareThreads().isExplicit()).isFalse();
 
         assertThat(e.getThreadPriority().getValue()).isEqualTo(5);
@@ -120,7 +120,7 @@ class TomcatDefaultsTest {
         assertThat(e.getMaxThreads().getValue()).isEqualTo(150);
         assertThat(e.getMaxThreads().isExplicit()).isTrue();
 
-        assertThat(e.getMinSpareThreads().getValue()).isEqualTo(10);
+        assertThat(e.getMinSpareThreads().getValue()).isEqualTo(25);
         assertThat(e.getMinSpareThreads().isExplicit()).isFalse();
     }
 

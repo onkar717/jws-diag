@@ -2,6 +2,10 @@ package org.jboss.jws.diag.config.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ValveTypeTest {
@@ -44,9 +48,12 @@ class ValveTypeTest {
 
     @Test
     void labelsAreDistinctAndNonEmpty() {
-        for (ValveType t : ValveType.values()) {
-            assertThat(t.getLabel()).isNotBlank();
-        }
+        List<String> labels = Arrays.stream(ValveType.values())
+                .map(ValveType::getLabel)
+                .collect(Collectors.toList());
+        assertThat(labels).doesNotContainNull();
+        assertThat(labels).doesNotHaveDuplicates();
+        labels.forEach(l -> assertThat(l).isNotBlank());
     }
 
     @Test

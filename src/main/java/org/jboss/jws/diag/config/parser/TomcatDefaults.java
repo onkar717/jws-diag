@@ -26,7 +26,7 @@ public final class TomcatDefaults {
     public static final boolean HOST_UNPACK_WARS = true;
 
     public static final int    EXECUTOR_MAX_THREADS        = 200;
-    public static final int    EXECUTOR_MIN_SPARE_THREADS  = 10;
+    public static final int    EXECUTOR_MIN_SPARE_THREADS  = 25;
     public static final int    EXECUTOR_THREAD_PRIORITY    = 5;
     public static final int    EXECUTOR_MAX_IDLE_TIME      = 60000;
 
