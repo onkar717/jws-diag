@@ -1,0 +1,28 @@
+Connector :8080 [HTTP/1.1]
+  protocol: HTTP/1.1 (explicit)
+  sslEnabled: false (default)
+  maxThreads: 200 (default)
+  connectionTimeout: 20000 (explicit)
+  maxConnections: 8192 (default)
+  compression: off (default)
+Connector :8443 [org.apache.coyote.http11.Http11NioProtocol] ★ SSL
+  protocol: org.apache.coyote.http11.Http11NioProtocol (explicit)
+  sslEnabled: true (explicit)
+  maxThreads: 150 (explicit)
+  connectionTimeout: 20000 (explicit)
+  maxConnections: 8192 (default)
+  compression: off (default)
+  SSLHostConfig:
+    protocols: TLSv1.2,TLSv1.3
+    certificateVerification: none
+    Certificate:
+      keystoreFile: conf/localhost-rsa.jks
+      keystoreType: JKS (explicit)
+      keystorePass: ***REDACTED***
+      type: RSA
+Realm: org.apache.catalina.realm.LockOutRealm
+  Realm: org.apache.catalina.realm.UserDatabaseRealm
+Host: localhost
+  appBase: webapps (explicit)
+  autoDeploy: true (explicit)
+  unpackWARs: true (explicit)

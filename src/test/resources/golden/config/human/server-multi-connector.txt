@@ -1,0 +1,26 @@
+Connector :8080 [HTTP/1.1]
+  protocol: HTTP/1.1 (explicit)
+  sslEnabled: false (default)
+  maxThreads: 200 (default)
+  connectionTimeout: 20000 (explicit)
+  maxConnections: 8192 (default)
+  compression: off (default)
+Connector :8443 [org.apache.coyote.http11.Http11NioProtocol] ★ SSL
+  protocol: org.apache.coyote.http11.Http11NioProtocol (explicit)
+  sslEnabled: true (explicit)
+  maxThreads: 150 (explicit)
+  connectionTimeout: 20000 (explicit)
+  maxConnections: 8192 (default)
+  compression: off (default)
+Connector :8009 [AJP/1.3]
+  protocol: AJP/1.3 (explicit)
+  sslEnabled: false (default)
+  maxThreads: 200 (default)
+  connectionTimeout: 60000 (default)
+  maxConnections: 8192 (default)
+  compression: off (default)
+  secretRequired: true (default)
+Host: localhost
+  appBase: webapps (explicit)
+  autoDeploy: true (explicit)
+  unpackWARs: true (explicit)

@@ -154,6 +154,34 @@ class ConfigHumanFormatterTest {
     }
 
     @Test
+    void executorShowsThreadPriorityAndMaxIdleTime() {
+        ExecutorConfig exec = ExecutorConfig.builder()
+                .name("pool")
+                .maxThreads(ConfigValue.defaulted(200))
+                .minSpareThreads(ConfigValue.defaulted(25))
+                .threadPriority(ConfigValue.defaulted(5))
+                .maxIdleTime(ConfigValue.defaulted(60000))
+                .build();
+        ServerConfig config = ServerConfig.builder()
+                .shutdownPort(8005)
+                .shutdownCommand("SHUTDOWN")
+                .listeners(Collections.emptyList())
+                .services(List.of(ServiceConfig.builder()
+                        .name("Catalina")
+                        .connectors(Collections.emptyList())
+                        .executors(List.of(exec))
+                        .engine(EngineConfig.builder()
+                                .name("Catalina").defaultHost("localhost")
+                                .hosts(Collections.emptyList()).build())
+                        .build()))
+                .build();
+        String output = formatter.format(config);
+
+        assertThat(output).contains("threadPriority: 5 (default)");
+        assertThat(output).contains("maxIdleTime: 60000 (default)");
+    }
+
+    @Test
     void ajpConnectorShowsSecretRequired() {
         ConnectorConfig conn = ConnectorConfig.builder()
                 .port(8009)

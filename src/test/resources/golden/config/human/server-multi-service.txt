@@ -1,0 +1,24 @@
+Service: Catalina
+  Connector :8080 [HTTP/1.1]
+    protocol: HTTP/1.1 (explicit)
+    sslEnabled: false (default)
+    maxThreads: 200 (default)
+    connectionTimeout: 20000 (explicit)
+    maxConnections: 8192 (default)
+    compression: off (default)
+  Host: localhost
+    appBase: webapps (explicit)
+    autoDeploy: true (explicit)
+    unpackWARs: true (explicit)
+Service: Admin
+  Connector :9080 [HTTP/1.1]
+    protocol: HTTP/1.1 (explicit)
+    sslEnabled: false (default)
+    maxThreads: 200 (default)
+    connectionTimeout: 30000 (explicit)
+    maxConnections: 8192 (default)
+    compression: off (default)
+  Host: admin.localhost
+    appBase: admin-webapps (explicit)
+    autoDeploy: false (explicit)
+    unpackWARs: true (explicit)

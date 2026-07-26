@@ -1,0 +1,11 @@
+Connector :8443 [HTTP/1.1]
+  protocol: HTTP/1.1 (default)
+  sslEnabled: false (default)
+  maxThreads: 200 (default)
+  connectionTimeout: 60000 (default)
+  maxConnections: 8192 (default)
+  compression: off (default)
+Host: localhost
+  appBase: webapps (default)
+  autoDeploy: true (default)
+  unpackWARs: true (default)

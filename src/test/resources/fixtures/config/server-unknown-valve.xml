@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Host contains a valve with an unrecognised className.
+  In JSON output: valveType must be absent (null suppressed via @JsonInclude(NON_NULL)).
+  In human output: raw className shown without a label prefix.
+-->
+<Server port="8005" shutdown="SHUTDOWN">
+  <Service name="Catalina">
+
+    <Connector port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"/>
+
+    <Engine name="Catalina" defaultHost="localhost">
+      <Host name="localhost" appBase="webapps"
+            unpackWARs="true" autoDeploy="true">
+        <Valve className="com.example.CustomAuditValve"
+               logFile="audit.log" rotate="true"/>
+        <Valve className="org.apache.catalina.valves.AccessLogValve"
+               directory="logs" pattern="%h %t %r %s"/>
+      </Host>
+    </Engine>
+  </Service>
+</Server>

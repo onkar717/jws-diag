@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Executor with only 'name' — all four attributes (maxThreads, minSpareThreads,
+  threadPriority, maxIdleTime) must be filled with Tomcat compiled-in defaults.
+-->
+<Server port="8005" shutdown="SHUTDOWN">
+  <Service name="Catalina">
+
+    <Executor name="minimalPool"/>
+
+    <Connector port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               executor="minimalPool"/>
+
+    <Engine name="Catalina" defaultHost="localhost">
+      <Host name="localhost" appBase="webapps"
+            unpackWARs="true" autoDeploy="true">
+      </Host>
+    </Engine>
+  </Service>
+</Server>

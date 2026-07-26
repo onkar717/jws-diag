@@ -127,6 +127,8 @@ public class ConfigHumanFormatter {
         String ind = prefix + INDENT;
         appendConfigValue(sb, ind, "maxThreads", exec.getMaxThreads());
         appendConfigValue(sb, ind, "minSpareThreads", exec.getMinSpareThreads());
+        appendConfigValue(sb, ind, "threadPriority", exec.getThreadPriority());
+        appendConfigValue(sb, ind, "maxIdleTime", exec.getMaxIdleTime());
         if (exec.getNamePrefix() != null)
             sb.append(ind).append("namePrefix: ").append(exec.getNamePrefix()).append('\n');
     }
