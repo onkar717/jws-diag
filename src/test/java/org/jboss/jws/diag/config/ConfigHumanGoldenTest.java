@@ -39,6 +39,9 @@ class ConfigHumanGoldenTest {
             "server-proxy-valve",
             "server-multi-service",
             "server-full-tls",
+            "server-vault-refs",
+            "server-vault-tls",
+            "server-property-refs",
             "server-empty-executor",
             "server-unknown-valve"
     })

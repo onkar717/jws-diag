@@ -1,0 +1,12 @@
+Connector :8080 [HTTP/1.1]
+  protocol: HTTP/1.1 (explicit)
+  sslEnabled: false (default)
+  maxThreads: 200 (default)
+  connectionTimeout: 20000 (explicit)
+  maxConnections: 8192 (default)
+  compression: off (default)
+  proxyName: ${VAULT::network::proxyHost::1}
+Host: localhost
+  appBase: webapps (explicit)
+  autoDeploy: true (explicit)
+  unpackWARs: true (explicit)
