@@ -133,4 +133,19 @@ class InstanceScannerTest {
         assertThat(instances).hasSize(1);
         assertThat(instances.get(0).getPid()).isEqualTo(200);
     }
+
+    @Test
+    void unreadableCmdlineEntry_silentlySkipped() throws IOException {
+        Path home = dir("t-home2");
+        createProcess("400", cmdline(
+                "/usr/bin/java", "-Dcatalina.home=" + home,
+                "org.apache.catalina.startup.Bootstrap", "start"
+        ));
+        // Pid directory with no cmdline file — Files.isReadable returns false, entry skipped
+        Files.createDirectories(proc.resolve("999"));
+
+        List<TomcatInstance> instances = new InstanceScanner(proc).scan();
+        assertThat(instances).hasSize(1);
+        assertThat(instances.get(0).getPid()).isEqualTo(400);
+    }
 }
