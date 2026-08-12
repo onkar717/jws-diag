@@ -1,10 +1,12 @@
 package org.jboss.jws.diag.diff;
 
+import org.jboss.jws.diag.config.model.CertificateConfig;
 import org.jboss.jws.diag.config.model.ConfigValue;
 import org.jboss.jws.diag.config.model.ConnectorConfig;
 import org.jboss.jws.diag.config.model.ExecutorConfig;
 import org.jboss.jws.diag.config.model.ServerConfig;
 import org.jboss.jws.diag.config.model.ServiceConfig;
+import org.jboss.jws.diag.config.model.SslHostConfig;
 import org.jboss.jws.diag.diff.model.ChangeType;
 import org.jboss.jws.diag.diff.model.DiffEntry;
 import org.jboss.jws.diag.diff.model.DiffReport;
@@ -190,5 +192,149 @@ class ConfigDifferTest {
 
         assertThat(report.getLeft()).isEqualTo(LEFT.toString());
         assertThat(report.getRight()).isEqualTo(RIGHT.toString());
+    }
+
+    // ── SSL / certificate / shutdownCommand ──────────────────────────────────
+
+    @Test
+    void shutdownCommandChange_reportedAsChanged() {
+        ServerConfig left = ServerConfig.builder()
+                .shutdownPort(8005).shutdownCommand("SHUTDOWN")
+                .listeners(Collections.emptyList())
+                .services(List.of(ServiceConfig.builder()
+                        .name("Catalina").connectors(Collections.emptyList())
+                        .executors(Collections.emptyList()).build()))
+                .build();
+        ServerConfig right = ServerConfig.builder()
+                .shutdownPort(8005).shutdownCommand("STOP")
+                .listeners(Collections.emptyList())
+                .services(List.of(ServiceConfig.builder()
+                        .name("Catalina").connectors(Collections.emptyList())
+                        .executors(Collections.emptyList()).build()))
+                .build();
+
+        DiffReport report = differ.diff(LEFT, RIGHT, left, right);
+
+        DiffEntry entry = report.getEntries().stream()
+                .filter(e -> e.getPath().equals("server.shutdownCommand"))
+                .findFirst().orElseThrow();
+        assertThat(entry.getType()).isEqualTo(ChangeType.CHANGED);
+        assertThat(entry.getLeftValue()).isEqualTo("SHUTDOWN");
+        assertThat(entry.getRightValue()).isEqualTo("STOP");
+    }
+
+    @Test
+    void sslHostConfigAddedInRight_reportedAsAdded() {
+        ServerConfig left = server(8005,
+                List.of(connector(8443, 200, false)), Collections.emptyList());
+        ServerConfig right = server(8005,
+                List.of(sslConnector(8443, List.of(ssl("_default_", "TLSv1.2,TLSv1.3",
+                        Collections.emptyList())))),
+                Collections.emptyList());
+
+        DiffReport report = differ.diff(LEFT, RIGHT, left, right);
+
+        DiffEntry entry = report.getEntries().stream()
+                .filter(e -> e.getPath().contains(".ssl[") && e.getType() == ChangeType.ADDED)
+                .findFirst().orElseThrow();
+        assertThat(entry.getRightValue()).isEqualTo("_default_");
+    }
+
+    @Test
+    void sslHostConfigProtocolChange_reportedAsChanged() {
+        ServerConfig left = server(8005,
+                List.of(sslConnector(8443, List.of(ssl("_default_", "TLSv1.2", Collections.emptyList())))),
+                Collections.emptyList());
+        ServerConfig right = server(8005,
+                List.of(sslConnector(8443, List.of(ssl("_default_", "TLSv1.2,TLSv1.3",
+                        Collections.emptyList())))),
+                Collections.emptyList());
+
+        DiffReport report = differ.diff(LEFT, RIGHT, left, right);
+
+        DiffEntry entry = report.getEntries().stream()
+                .filter(e -> e.getPath().endsWith(".protocols"))
+                .findFirst().orElseThrow();
+        assertThat(entry.getType()).isEqualTo(ChangeType.CHANGED);
+        assertThat(entry.getLeftValue()).isEqualTo("TLSv1.2");
+        assertThat(entry.getRightValue()).isEqualTo("TLSv1.2,TLSv1.3");
+    }
+
+    @Test
+    void certificateAddedInRight_reportedAsAdded() {
+        CertificateConfig cert = CertificateConfig.builder()
+                .keystoreFile("conf/server.jks")
+                .keystoreType(ConfigValue.explicit("JKS"))
+                .type("RSA")
+                .build();
+        ServerConfig left = server(8005,
+                List.of(sslConnector(8443, List.of(ssl("_default_", "TLSv1.2",
+                        Collections.emptyList())))),
+                Collections.emptyList());
+        ServerConfig right = server(8005,
+                List.of(sslConnector(8443, List.of(ssl("_default_", "TLSv1.2",
+                        List.of(cert))))),
+                Collections.emptyList());
+
+        DiffReport report = differ.diff(LEFT, RIGHT, left, right);
+
+        DiffEntry entry = report.getEntries().stream()
+                .filter(e -> e.getPath().contains(".certificate[") && e.getType() == ChangeType.ADDED)
+                .findFirst().orElseThrow();
+        assertThat(entry.getRightValue()).isEqualTo("RSA");
+    }
+
+    @Test
+    void certificateKeystoreFileChange_reportedAsChanged() {
+        CertificateConfig leftCert = CertificateConfig.builder()
+                .keystoreFile("conf/old.jks")
+                .keystoreType(ConfigValue.explicit("JKS"))
+                .type("RSA")
+                .build();
+        CertificateConfig rightCert = CertificateConfig.builder()
+                .keystoreFile("conf/new.jks")
+                .keystoreType(ConfigValue.explicit("JKS"))
+                .type("RSA")
+                .build();
+        ServerConfig left = server(8005,
+                List.of(sslConnector(8443, List.of(ssl("_default_", "TLSv1.2", List.of(leftCert))))),
+                Collections.emptyList());
+        ServerConfig right = server(8005,
+                List.of(sslConnector(8443, List.of(ssl("_default_", "TLSv1.2", List.of(rightCert))))),
+                Collections.emptyList());
+
+        DiffReport report = differ.diff(LEFT, RIGHT, left, right);
+
+        DiffEntry entry = report.getEntries().stream()
+                .filter(e -> e.getPath().endsWith(".keystoreFile"))
+                .findFirst().orElseThrow();
+        assertThat(entry.getType()).isEqualTo(ChangeType.CHANGED);
+        assertThat(entry.getLeftValue()).isEqualTo("conf/old.jks");
+        assertThat(entry.getRightValue()).isEqualTo("conf/new.jks");
+    }
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+
+    private static ConnectorConfig sslConnector(int port, List<SslHostConfig> sslHostConfigs) {
+        return ConnectorConfig.builder()
+                .port(port)
+                .protocol(ConfigValue.explicit("org.apache.coyote.http11.Http11NioProtocol"))
+                .sslEnabled(ConfigValue.explicit(true))
+                .maxThreads(ConfigValue.defaulted(200))
+                .connectionTimeout(ConfigValue.defaulted(20000))
+                .maxConnections(ConfigValue.defaulted(8192))
+                .compression(ConfigValue.defaulted("off"))
+                .secretRequired(ConfigValue.defaulted(false))
+                .sslHostConfigs(sslHostConfigs)
+                .build();
+    }
+
+    private static SslHostConfig ssl(String hostName, String protocols,
+                                     List<CertificateConfig> certs) {
+        return SslHostConfig.builder()
+                .hostName(hostName)
+                .protocols(protocols)
+                .certificates(certs)
+                .build();
     }
 }
