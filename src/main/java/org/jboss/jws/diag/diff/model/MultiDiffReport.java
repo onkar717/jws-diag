@@ -1,0 +1,50 @@
+package org.jboss.jws.diag.diff.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Result of a multi-instance diff: all running JWS instances compared against a
+ * single reference instance (the one with the lowest PID).
+ */
+@JsonPropertyOrder({"schemaVersion", "referencePid", "referenceBase", "instanceCount", "comparisons"})
+public final class MultiDiffReport {
+
+    private static final String SCHEMA_VERSION = "1.0";
+
+    private final int referencePid;
+    private final Path referenceBase;
+    private final int instanceCount;
+    private final List<InstanceDiffResult> comparisons;
+
+    public MultiDiffReport(int referencePid, Path referenceBase,
+                           int instanceCount, List<InstanceDiffResult> comparisons) {
+        this.referencePid = referencePid;
+        this.referenceBase = referenceBase;
+        this.instanceCount = instanceCount;
+        this.comparisons = Collections.unmodifiableList(comparisons);
+    }
+
+    @JsonProperty("schemaVersion")
+    public String getSchemaVersion() { return SCHEMA_VERSION; }
+
+    @JsonProperty("referencePid")
+    public int getReferencePid() { return referencePid; }
+
+    @JsonProperty("referenceBase")
+    public String getReferenceBase() { return referenceBase.toString().replace('\\', '/'); }
+
+    @JsonProperty("instanceCount")
+    public int getInstanceCount() { return instanceCount; }
+
+    @JsonProperty("comparisons")
+    public List<InstanceDiffResult> getComparisons() { return comparisons; }
+
+    public boolean hasDifferences() {
+        return comparisons.stream().anyMatch(InstanceDiffResult::hasDifferences);
+    }
+}
