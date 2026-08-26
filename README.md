@@ -210,6 +210,26 @@ Attributes absent from `server.xml` receive their Tomcat 10.1.x compiled-in defa
 
 Note: listener presence indicates the library is **configured**, not confirmed loaded at runtime.
 
+## Test coverage
+
+Run the full test suite and generate a coverage report:
+
+```bash
+mvn test
+```
+
+The HTML report is written to `target/site/jacoco/index.html`. Current
+instruction coverage on `main` is **89%**.
+
+To enforce the coverage floor (required in CI):
+
+```bash
+mvn verify
+```
+
+`mvn verify` fails the build if instruction coverage drops below **80%**.
+The floor is defined in the JaCoCo `check` execution in `pom.xml`.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow, code standards,
