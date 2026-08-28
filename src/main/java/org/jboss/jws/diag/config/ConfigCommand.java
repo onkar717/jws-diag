@@ -5,9 +5,15 @@ import org.jboss.jws.diag.common.OutputFormat;
 import org.jboss.jws.diag.common.OutputFormatMixin;
 import org.jboss.jws.diag.config.formatter.ConfigHumanFormatter;
 import org.jboss.jws.diag.config.formatter.ConfigJsonFormatter;
+import org.jboss.jws.diag.config.formatter.MultiConfigHumanFormatter;
+import org.jboss.jws.diag.config.formatter.MultiConfigJsonFormatter;
+import org.jboss.jws.diag.config.model.InstanceConfigResult;
+import org.jboss.jws.diag.config.model.MultiConfigReport;
 import org.jboss.jws.diag.config.model.ServerConfig;
 import org.jboss.jws.diag.config.parser.PropertyResolver;
 import org.jboss.jws.diag.config.parser.ServerXmlParser;
+import org.jboss.jws.diag.instances.InstanceScanner;
+import org.jboss.jws.diag.instances.model.TomcatInstance;
 import org.jboss.jws.diag.summary.discovery.CatalinaDiscovery;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
@@ -16,6 +22,8 @@ import picocli.CommandLine.Option;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 @Command(name = "config",
         description = "Parse and display effective connector, TLS, proxy, and executor configuration",
@@ -31,8 +39,20 @@ public class ConfigCommand implements Runnable {
     @Option(names = "--catalina-base", description = "Path to CATALINA_BASE (defaults to CATALINA_HOME)")
     private Path catalinaBase;
 
+    @Option(names = "--all",
+            description = "Scan /proc for all running JWS instances and show config for each")
+    private boolean all;
+
     @Override
     public void run() {
+        if (all) {
+            runMultiConfig();
+        } else {
+            runSingleConfig();
+        }
+    }
+
+    private void runSingleConfig() {
         Path base = resolveBase();
         if (base == null) {
             System.err.println("ERROR: Could not determine CATALINA_BASE. "
@@ -41,19 +61,8 @@ public class ConfigCommand implements Runnable {
             return;
         }
 
-        Path serverXml = base.resolve("conf/server.xml");
-        if (!Files.exists(serverXml)) {
-            System.err.println("ERROR: server.xml not found at: " + serverXml);
-            System.exit(ExitCodes.ERRORS);
-            return;
-        }
-
-        ServerConfig config;
-        try {
-            PropertyResolver resolver = PropertyResolver.create(base);
-            config = new ServerXmlParser(resolver).parse(serverXml);
-        } catch (IOException e) {
-            System.err.println("ERROR: Failed to parse server.xml: " + e.getMessage());
+        ServerConfig config = parseConfig(base);
+        if (config == null) {
             System.exit(ExitCodes.ERRORS);
             return;
         }
@@ -67,6 +76,52 @@ public class ConfigCommand implements Runnable {
 
         System.out.println(output);
         System.exit(ExitCodes.OK);
+    }
+
+    private void runMultiConfig() {
+        List<TomcatInstance> instances = new InstanceScanner().scan();
+
+        if (instances.isEmpty()) {
+            System.err.println("ERROR: --all found no running JWS instances");
+            System.exit(ExitCodes.ERRORS);
+            return;
+        }
+
+        List<InstanceConfigResult> results = new ArrayList<>();
+        for (TomcatInstance inst : instances) {
+            Path base = inst.getCatalinaBase();
+            ServerConfig config = parseConfig(base);
+            if (config != null) {
+                results.add(new InstanceConfigResult(inst.getPid(), base, config));
+            }
+        }
+
+        MultiConfigReport report = new MultiConfigReport(instances.size(), results);
+
+        String output;
+        if (outputFormat.getFormat() == OutputFormat.JSON) {
+            output = new MultiConfigJsonFormatter().format(report);
+        } else {
+            output = new MultiConfigHumanFormatter().format(report);
+        }
+
+        System.out.println(output);
+        System.exit(ExitCodes.OK);
+    }
+
+    private ServerConfig parseConfig(Path base) {
+        Path serverXml = base.resolve("conf/server.xml");
+        if (!Files.exists(serverXml)) {
+            System.err.println("ERROR: server.xml not found at: " + serverXml);
+            return null;
+        }
+        try {
+            PropertyResolver resolver = PropertyResolver.create(base);
+            return new ServerXmlParser(resolver).parse(serverXml);
+        } catch (IOException e) {
+            System.err.println("ERROR: Failed to parse server.xml: " + e.getMessage());
+            return null;
+        }
     }
 
     private Path resolveBase() {
