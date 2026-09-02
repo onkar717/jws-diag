@@ -71,11 +71,18 @@ public class SummaryCommand implements Runnable {
         }
 
         List<JwsInstallation> installations = new ArrayList<>();
+        int skipped = 0;
         for (TomcatInstance inst : instances) {
-            JwsInstallation installation = DiscoveryModule
-                    .create(inst.getCatalinaHome(), inst.getCatalinaBase())
-                    .discover();
-            installations.add(installation);
+            try {
+                JwsInstallation installation = DiscoveryModule
+                        .create(inst.getCatalinaHome(), inst.getCatalinaBase())
+                        .discover();
+                installations.add(installation);
+            } catch (Exception e) {
+                System.err.println("WARN: Skipping PID " + inst.getPid()
+                        + ": discovery failed: " + e.getMessage());
+                skipped++;
+            }
         }
 
         MultiSummaryReport report = new MultiSummaryReport(instances.size(), installations);
@@ -88,6 +95,6 @@ public class SummaryCommand implements Runnable {
         }
 
         System.out.println(output);
-        System.exit(ExitCodes.OK);
+        System.exit(skipped > 0 ? ExitCodes.WARNINGS : ExitCodes.OK);
     }
 }

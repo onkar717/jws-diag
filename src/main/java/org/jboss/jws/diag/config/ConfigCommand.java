@@ -88,11 +88,16 @@ public class ConfigCommand implements Runnable {
         }
 
         List<InstanceConfigResult> results = new ArrayList<>();
+        int skipped = 0;
         for (TomcatInstance inst : instances) {
             Path base = inst.getCatalinaBase();
             ServerConfig config = parseConfig(base);
             if (config != null) {
                 results.add(new InstanceConfigResult(inst.getPid(), base, config));
+            } else {
+                System.err.println("WARN: Skipping PID " + inst.getPid()
+                        + ": could not parse config for " + base);
+                skipped++;
             }
         }
 
@@ -106,7 +111,7 @@ public class ConfigCommand implements Runnable {
         }
 
         System.out.println(output);
-        System.exit(ExitCodes.OK);
+        System.exit(skipped > 0 ? ExitCodes.WARNINGS : ExitCodes.OK);
     }
 
     private ServerConfig parseConfig(Path base) {
