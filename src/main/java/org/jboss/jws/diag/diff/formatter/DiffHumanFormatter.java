@@ -35,6 +35,17 @@ public final class DiffHumanFormatter {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("Diff  left : %s%n", report.getLeft()));
         sb.append(String.format("      right: %s%n", report.getRight()));
+        sb.append(formatBody(report));
+        return sb.toString();
+    }
+
+    /**
+     * Renders only the diff body (change list or "No differences found"),
+     * without the two-line left/right header. Intended for composition by
+     * {@code MultiDiffHumanFormatter}.
+     */
+    public String formatBody(DiffReport report) {
+        StringBuilder sb = new StringBuilder();
 
         if (!report.hasDifferences()) {
             sb.append("\nNo differences found.\n");

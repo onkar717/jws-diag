@@ -38,21 +38,8 @@ public final class MultiDiffHumanFormatter {
             sb.append('\n');
             sb.append(String.format("Instance PID %d  %s%n", result.getPid(), result.getCatalinaBase()));
             sb.append(RULE).append('\n');
-            // Delegate body rendering to the single-diff formatter (strips the header line)
-            String singleOutput = SINGLE.format(result.getDiff());
-            // Drop the "Diff  left: ... right: ..." header — it is redundant here
-            String body = dropHeader(singleOutput);
-            sb.append(body);
+            sb.append(SINGLE.formatBody(result.getDiff()));
         }
         return sb.toString();
-    }
-
-    private static String dropHeader(String formatted) {
-        // The header is the first two lines ("Diff  left : ...\n      right: ...\n")
-        int first = formatted.indexOf('\n');
-        if (first < 0) return formatted;
-        int second = formatted.indexOf('\n', first + 1);
-        if (second < 0) return formatted.substring(first + 1);
-        return formatted.substring(second + 1);
     }
 }

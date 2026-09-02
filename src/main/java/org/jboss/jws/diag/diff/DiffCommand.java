@@ -117,9 +117,17 @@ public class DiffCommand implements Runnable {
             TomcatInstance inst = instances.get(i);
             Path instBase = inst.getCatalinaBase();
             Path instXml = resolveServerXml("PID " + inst.getPid(), instBase);
-            if (instXml == null) continue;
+            if (instXml == null) {
+                System.err.println("WARN: Skipping PID " + inst.getPid()
+                        + ": server.xml not found under " + instBase);
+                continue;
+            }
             ServerConfig instConfig = parse(instXml, instBase);
-            if (instConfig == null) continue;
+            if (instConfig == null) {
+                System.err.println("WARN: Skipping PID " + inst.getPid()
+                        + ": failed to parse server.xml");
+                continue;
+            }
 
             DiffReport diff = differ.diff(refBase, instBase, refConfig, instConfig);
             comparisons.add(new InstanceDiffResult(inst.getPid(), instBase, diff));

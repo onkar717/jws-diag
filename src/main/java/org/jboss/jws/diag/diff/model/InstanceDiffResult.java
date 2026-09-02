@@ -1,5 +1,6 @@
 package org.jboss.jws.diag.diff.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -35,7 +36,9 @@ public final class InstanceDiffResult {
     @JsonProperty("changes")
     public List<DiffEntry> getChanges() { return diff.getEntries(); }
 
+    @JsonIgnore
     public DiffReport getDiff() { return diff; }
 
+    @JsonIgnore
     public boolean hasDifferences() { return diff.hasDifferences(); }
 }
