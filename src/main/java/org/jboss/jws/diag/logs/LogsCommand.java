@@ -3,7 +3,6 @@ package org.jboss.jws.diag.logs;
 import org.jboss.jws.diag.common.ExitCodes;
 import org.jboss.jws.diag.common.OutputFormat;
 import org.jboss.jws.diag.common.OutputFormatMixin;
-import org.jboss.jws.diag.common.Severity;
 import org.jboss.jws.diag.instances.InstanceScanner;
 import org.jboss.jws.diag.instances.model.TomcatInstance;
 import org.jboss.jws.diag.logs.formatter.LogsHumanFormatter;
@@ -11,7 +10,6 @@ import org.jboss.jws.diag.logs.formatter.LogsJsonFormatter;
 import org.jboss.jws.diag.logs.formatter.MultiLogsHumanFormatter;
 import org.jboss.jws.diag.logs.formatter.MultiLogsJsonFormatter;
 import org.jboss.jws.diag.logs.model.InstanceLogResult;
-import org.jboss.jws.diag.logs.model.LogPattern;
 import org.jboss.jws.diag.logs.model.LogScanResult;
 import org.jboss.jws.diag.logs.model.MultiLogReport;
 import org.jboss.jws.diag.summary.discovery.CatalinaDiscovery;
@@ -88,7 +86,7 @@ public class LogsCommand implements Runnable {
                 break;
         }
 
-        System.exit(determineExitCode(result));
+        System.exit(LogsExitCodeCalculator.determineExitCode(result));
     }
 
     private void runMulti() {
@@ -133,7 +131,12 @@ public class LogsCommand implements Runnable {
         }
         System.out.println(output);
 
-        System.exit(determineMultiExitCode(results));
+        if (results.isEmpty()) {
+            System.err.println("ERROR: No instance logs could be scanned ("
+                    + instances.size() + " instance(s) discovered, all skipped).");
+        }
+
+        System.exit(LogsExitCodeCalculator.determineMultiExitCode(results, instances.size()));
     }
 
     private Path resolveLogFile() {
@@ -151,33 +154,4 @@ public class LogsCommand implements Runnable {
         return result.getCatalinaBase() != null ? result.getCatalinaBase() : result.getCatalinaHome();
     }
 
-    private int determineExitCode(LogScanResult result) {
-        for (LogPattern p : LogPattern.values()) {
-            if (result.countFor(p) > 0) {
-                if (p.getSeverity() == Severity.ERROR) return ExitCodes.ERRORS;
-            }
-        }
-        for (LogPattern p : LogPattern.values()) {
-            if (result.countFor(p) > 0) {
-                if (p.getSeverity() == Severity.WARN) return ExitCodes.WARNINGS;
-            }
-        }
-        return ExitCodes.OK;
-    }
-
-    private int determineMultiExitCode(List<InstanceLogResult> results) {
-        boolean hasError = false;
-        boolean hasWarn = false;
-        for (InstanceLogResult ilr : results) {
-            for (LogPattern p : LogPattern.values()) {
-                if (ilr.getResult().countFor(p) > 0) {
-                    if (p.getSeverity() == Severity.ERROR) hasError = true;
-                    if (p.getSeverity() == Severity.WARN) hasWarn = true;
-                }
-            }
-        }
-        if (hasError) return ExitCodes.ERRORS;
-        if (hasWarn) return ExitCodes.WARNINGS;
-        return ExitCodes.OK;
-    }
 }
