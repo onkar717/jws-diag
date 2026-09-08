@@ -93,6 +93,7 @@ public final class LogCollector {
                             System.err.println(
                                     "[WARN] Could not read log file: "
                                             + path + ": " + e.getMessage());
+                            context.recordSkippedFile();
                         }
                     });
         }

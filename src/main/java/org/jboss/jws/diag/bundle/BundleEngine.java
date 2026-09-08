@@ -38,6 +38,7 @@ public class BundleEngine {
             } catch (RedactionException e) {
                 System.err.println("[WARN] Skipping file due to redaction failure: "
                         + file.getRelativeArchivePath() + " (" + e.getMessage() + ")");
+                context.recordSkippedFile();
                 continue;
             }
             stagingWriter.write(redactedFile, context);

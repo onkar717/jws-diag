@@ -36,7 +36,7 @@ public class ValidateCommand implements Runnable {
             resolvedCatalinaBase = resolveCatalinaBase();
         } catch (IllegalStateException e) {
             System.err.println("[ERROR] " + e.getMessage());
-            return ExitCodes.ERRORS;
+            return ExitCodes.TOOL_FAILURE;
         }
 
         ValidationEngine validationEngine = new ValidationEngine();

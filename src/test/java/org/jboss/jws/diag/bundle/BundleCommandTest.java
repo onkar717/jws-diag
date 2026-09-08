@@ -43,13 +43,13 @@ public class BundleCommandTest {
     }
 
     @Test
-    void shouldReturnErrorExitCodeWhenCatalinaBaseNotSet() {
+    void shouldReturnToolFailureExitCodeWhenCatalinaBaseNotSet() {
         BundleCommand command = new BundleCommand();
         new CommandLine(command).parseArgs();
 
         int exitCode = command.execute();
 
-        assertThat(exitCode).isEqualTo(ExitCodes.ERRORS);
+        assertThat(exitCode).isEqualTo(ExitCodes.TOOL_FAILURE);
     }
 
     @Test

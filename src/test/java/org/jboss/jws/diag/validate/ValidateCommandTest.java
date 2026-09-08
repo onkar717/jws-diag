@@ -35,13 +35,13 @@ public class ValidateCommandTest {
 
     @Test
     @org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable(named = "CATALINA_BASE", matches = ".+")
-    void shouldReturnErrorExitCodeWhenCatalinaBaseNotSet() {
+    void shouldReturnToolFailureExitCodeWhenCatalinaBaseNotSet() {
         ValidateCommand command = new ValidateCommand();
         new CommandLine(command).parseArgs();
 
         int exitCode = command.execute();
 
-        assertThat(exitCode).isEqualTo(ExitCodes.ERRORS);
+        assertThat(exitCode).isEqualTo(ExitCodes.TOOL_FAILURE);
     }
 
     @Test

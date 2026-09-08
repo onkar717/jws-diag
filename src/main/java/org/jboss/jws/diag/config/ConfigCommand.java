@@ -57,13 +57,13 @@ public class ConfigCommand implements Runnable {
         if (base == null) {
             System.err.println("ERROR: Could not determine CATALINA_BASE. "
                     + "Use --catalina-home or --catalina-base, or ensure Tomcat is running.");
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
             return;
         }
 
         ServerConfig config = parseConfig(base);
         if (config == null) {
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
             return;
         }
 
@@ -83,7 +83,7 @@ public class ConfigCommand implements Runnable {
 
         if (instances.isEmpty()) {
             System.err.println("ERROR: --all found no running JWS instances");
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
             return;
         }
 
@@ -133,13 +133,13 @@ public class ConfigCommand implements Runnable {
         if (catalinaBase != null) {
             if (!Files.isDirectory(catalinaBase)) {
                 System.err.println("ERROR: --catalina-base is not a valid directory: " + catalinaBase);
-                System.exit(ExitCodes.ERRORS);
+                System.exit(ExitCodes.TOOL_FAILURE);
             }
             return catalinaBase;
         }
         if (catalinaHome != null && !Files.isDirectory(catalinaHome)) {
             System.err.println("ERROR: --catalina-home is not a valid directory: " + catalinaHome);
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
         }
         CatalinaDiscovery.Result result = CatalinaDiscovery.create(catalinaHome, null).discover();
         return result.getCatalinaBase();
