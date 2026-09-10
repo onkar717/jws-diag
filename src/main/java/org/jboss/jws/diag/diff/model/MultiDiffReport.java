@@ -2,6 +2,8 @@ package org.jboss.jws.diag.diff.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.jboss.jws.diag.common.UnixPathSerializer;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -36,7 +38,8 @@ public final class MultiDiffReport {
     public int getReferencePid() { return referencePid; }
 
     @JsonProperty("referenceBase")
-    public String getReferenceBase() { return referenceBase.toString().replace('\\', '/'); }
+    @JsonSerialize(using = UnixPathSerializer.class)
+    public Path getReferenceBase() { return referenceBase; }
 
     @JsonProperty("instanceCount")
     public int getInstanceCount() { return instanceCount; }

@@ -2,6 +2,8 @@ package org.jboss.jws.diag.diff.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.jboss.jws.diag.common.UnixPathSerializer;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -30,10 +32,12 @@ public final class DiffReport {
     public String getSchemaVersion() { return SCHEMA_VERSION; }
 
     @JsonProperty("left")
-    public String getLeft() { return leftBase.toString(); }
+    @JsonSerialize(using = UnixPathSerializer.class)
+    public Path getLeft() { return leftBase; }
 
     @JsonProperty("right")
-    public String getRight() { return rightBase.toString(); }
+    @JsonSerialize(using = UnixPathSerializer.class)
+    public Path getRight() { return rightBase; }
 
     @JsonProperty("changeCount")
     public int getChangeCount() { return entries.size(); }

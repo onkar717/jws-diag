@@ -86,4 +86,11 @@ class DiffJsonFormatterTest {
         assertThat(root.get("changes").size()).isEqualTo(0);
         assertThat(root.get("changeCount").asInt()).isEqualTo(0);
     }
+
+    @Test
+    void pathsInJson_useForwardSlashes() {
+        String json = formatter.format(new DiffReport(LEFT, RIGHT, Collections.emptyList()));
+
+        assertThat(json).doesNotContain("\\\\");
+    }
 }

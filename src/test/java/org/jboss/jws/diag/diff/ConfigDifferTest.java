@@ -190,8 +190,8 @@ class ConfigDifferTest {
         ServerConfig cfg = server(8005, Collections.emptyList(), Collections.emptyList());
         DiffReport report = differ.diff(LEFT, RIGHT, cfg, cfg);
 
-        assertThat(report.getLeft()).isEqualTo(LEFT.toString());
-        assertThat(report.getRight()).isEqualTo(RIGHT.toString());
+        assertThat(report.getLeft()).isEqualTo(LEFT);
+        assertThat(report.getRight()).isEqualTo(RIGHT);
     }
 
     // ── SSL / certificate / shutdownCommand ──────────────────────────────────
