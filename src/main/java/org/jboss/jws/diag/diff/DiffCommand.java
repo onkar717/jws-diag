@@ -52,7 +52,7 @@ public class DiffCommand implements Runnable {
         } else {
             if (left == null || right == null) {
                 System.err.println("ERROR: --left and --right are required when --all is not specified");
-                System.exit(ExitCodes.ERRORS);
+                System.exit(ExitCodes.TOOL_FAILURE);
                 return;
             }
             runSingleDiff();
@@ -63,14 +63,14 @@ public class DiffCommand implements Runnable {
         Path leftXml = resolveServerXml("--left", left);
         Path rightXml = resolveServerXml("--right", right);
         if (leftXml == null || rightXml == null) {
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
             return;
         }
 
         ServerConfig leftConfig = parse(leftXml, left);
         ServerConfig rightConfig = parse(rightXml, right);
         if (leftConfig == null || rightConfig == null) {
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
             return;
         }
 
@@ -93,7 +93,7 @@ public class DiffCommand implements Runnable {
         if (instances.size() < 2) {
             System.err.println("ERROR: --all requires at least 2 running JWS instances; found "
                     + instances.size());
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
             return;
         }
 
@@ -101,12 +101,12 @@ public class DiffCommand implements Runnable {
         Path refBase = reference.getCatalinaBase();
         Path refXml = resolveServerXml("reference (PID " + reference.getPid() + ")", refBase);
         if (refXml == null) {
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
             return;
         }
         ServerConfig refConfig = parse(refXml, refBase);
         if (refConfig == null) {
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
             return;
         }
 

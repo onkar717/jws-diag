@@ -21,6 +21,10 @@ public class InstancesCommand implements Runnable {
 
     @Override
     public void run() {
+        System.exit(execute());
+    }
+
+    public int execute() {
         List<TomcatInstance> instances = new InstanceScanner().scan();
 
         String output;
@@ -31,6 +35,12 @@ public class InstancesCommand implements Runnable {
         }
 
         System.out.println(output);
-        System.exit(instances.isEmpty() ? ExitCodes.WARNINGS : ExitCodes.OK);
+
+        if (instances.isEmpty()) {
+            System.out.println("No running Tomcat/JWS instances found.");
+        }
+
+        // Finding no running instance is a result, not a failure.
+        return ExitCodes.OK;
     }
 }

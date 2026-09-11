@@ -59,12 +59,12 @@ public class LogsCommand implements Runnable {
         if (target == null) {
             System.err.println("ERROR: Could not determine log file path. "
                     + "Use --log-file or --catalina-home/--catalina-base.");
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
             return;
         }
         if (!Files.exists(target)) {
             System.err.println("ERROR: Log file not found: " + target);
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
             return;
         }
 
@@ -73,7 +73,7 @@ public class LogsCommand implements Runnable {
             result = new LogScanner().scan(target);
         } catch (IOException e) {
             System.err.println("ERROR: Failed to scan log file: " + e.getMessage());
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
             return;
         }
 
@@ -93,7 +93,7 @@ public class LogsCommand implements Runnable {
         List<TomcatInstance> instances = new InstanceScanner().scan();
         if (instances.isEmpty()) {
             System.err.println("ERROR: No running JWS instances found via /proc.");
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
             return;
         }
 

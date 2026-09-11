@@ -66,7 +66,7 @@ public class SummaryCommand implements Runnable {
 
         if (instances.isEmpty()) {
             System.err.println("ERROR: --all found no running JWS instances");
-            System.exit(ExitCodes.ERRORS);
+            System.exit(ExitCodes.TOOL_FAILURE);
             return;
         }
 

@@ -54,7 +54,7 @@ public class BundleCommand implements Runnable {
             resolvedCatalinaBase = resolveCatalinaBase();
         } catch (IllegalStateException e) {
             System.err.println("[ERROR] " + e.getMessage());
-            return ExitCodes.ERRORS;
+            return ExitCodes.TOOL_FAILURE;
         }
 
         Path resolvedCatalinaHome = resolveCatalinaHome(resolvedCatalinaBase);
@@ -79,10 +79,17 @@ public class BundleCommand implements Runnable {
             }
 
             System.out.println("Bundle created at: " + archivePath);
+
+            int skipped = context.getSkippedFileCount();
+            if (skipped > 0) {
+                System.err.println("[WARN] Bundle is incomplete: " + skipped
+                        + " file(s) could not be collected.");
+                return ExitCodes.WARNINGS;
+            }
             return ExitCodes.OK;
         } catch (IOException e) {
             System.err.println("[ERROR] Failed to generate bundle: " + e.getMessage());
-            return ExitCodes.ERRORS;
+            return ExitCodes.TOOL_FAILURE;
         }
     }
 

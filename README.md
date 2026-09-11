@@ -230,6 +230,35 @@ mvn verify
 `mvn verify` fails the build if instruction coverage drops below **80%**.
 The floor is defined in the JaCoCo `check` execution in `pom.xml`.
 
+## Exit Codes
+
+Every command uses the same exit code contract. Codes 0 to 2 describe what the tool
+found. Code 3 describes the tool failing to look at all, so a CI gate can tell
+"your configuration has a problem" apart from "jws-diag could not run".
+
+| Code | Meaning |
+|------|---------|
+| `0`  | Ran successfully; nothing noteworthy found |
+| `1`  | Ran successfully; warning level findings, a non-empty difference, or a partially collected result |
+| `2`  | Ran successfully; error level findings |
+| `3`  | The tool itself failed: installation not found, file unreadable, malformed XML, or bad arguments |
+
+Per command:
+
+| Command | `0` | `1` | `2` | `3` |
+|---------|-----|-----|-----|-----|
+| `summary` | all instances reported | some instances skipped | not used | cannot resolve or read installation |
+| `config` | all instances reported | some instances skipped | not used | cannot resolve or parse `server.xml` |
+| `validate` | no findings above INFO | WARN findings | ERROR findings | cannot resolve `CATALINA_BASE` |
+| `diff` | configurations identical | configurations differ | not used | cannot resolve or parse either side |
+| `logs` | no matches above INFO | WARN matches, or some instances skipped | ERROR matches, or every instance skipped | cannot resolve or read the log file |
+| `modcluster` | configuration shown, **or none present** | not used | not used | cannot resolve or parse `server.xml` |
+| `instances` | instances listed, **or none running** | not used | not used | not used |
+| `bundle` | bundle written complete | bundle written, some files skipped | not used | cannot resolve paths or write the archive |
+
+Absence of optional configuration is a result, not a failure: `modcluster` with no
+mod_cluster listener and `instances` with nothing running both exit `0`.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow, code standards,

@@ -32,19 +32,28 @@ public class ModClusterCommand implements Runnable {
 
     @Override
     public void run() {
-        Path base = resolveBase();
+        System.exit(execute());
+    }
+
+    public int execute() {
+        Path base;
+        try {
+            base = resolveBase();
+        } catch (IllegalStateException e) {
+            System.err.println("ERROR: " + e.getMessage());
+            return ExitCodes.TOOL_FAILURE;
+        }
+
         if (base == null) {
             System.err.println("ERROR: Could not determine CATALINA_BASE. "
                     + "Use --catalina-home or --catalina-base.");
-            System.exit(ExitCodes.ERRORS);
-            return;
+            return ExitCodes.TOOL_FAILURE;
         }
 
         Path serverXml = base.resolve("conf/server.xml");
         if (!Files.exists(serverXml)) {
             System.err.println("ERROR: server.xml not found at: " + serverXml);
-            System.exit(ExitCodes.ERRORS);
-            return;
+            return ExitCodes.TOOL_FAILURE;
         }
 
         List<ModClusterConfig> configs;
@@ -52,8 +61,7 @@ public class ModClusterCommand implements Runnable {
             configs = new ModClusterParser().parse(serverXml);
         } catch (IOException e) {
             System.err.println("ERROR: Failed to parse server.xml: " + e.getMessage());
-            System.exit(ExitCodes.ERRORS);
-            return;
+            return ExitCodes.TOOL_FAILURE;
         }
 
         String output;
@@ -64,20 +72,26 @@ public class ModClusterCommand implements Runnable {
         }
 
         System.out.println(output);
-        System.exit(configs.isEmpty() ? ExitCodes.WARNINGS : ExitCodes.OK);
+
+        if (configs.isEmpty()) {
+            System.out.println("No mod_cluster configuration found in " + serverXml + ".");
+        }
+
+        // mod_cluster is optional. Its absence is a result, not a failure.
+        return ExitCodes.OK;
     }
 
     private Path resolveBase() {
         if (catalinaBase != null) {
             if (!Files.isDirectory(catalinaBase)) {
-                System.err.println("ERROR: --catalina-base is not a valid directory: " + catalinaBase);
-                System.exit(ExitCodes.ERRORS);
+                throw new IllegalStateException(
+                        "--catalina-base is not a valid directory: " + catalinaBase);
             }
             return catalinaBase;
         }
         if (catalinaHome != null && !Files.isDirectory(catalinaHome)) {
-            System.err.println("ERROR: --catalina-home is not a valid directory: " + catalinaHome);
-            System.exit(ExitCodes.ERRORS);
+            throw new IllegalStateException(
+                    "--catalina-home is not a valid directory: " + catalinaHome);
         }
         CatalinaDiscovery.Result result = CatalinaDiscovery.create(catalinaHome, null).discover();
         return result.getCatalinaBase();
