@@ -27,8 +27,8 @@ class DiffHumanFormatterTest {
         String out = formatter.format(report(Collections.emptyList()));
 
         assertThat(out).contains("No differences found.");
-        assertThat(out).contains("/opt/tomcat-a");
-        assertThat(out).contains("/opt/tomcat-b");
+        assertThat(out).contains(LEFT.toString());
+        assertThat(out).contains(RIGHT.toString());
     }
 
     @Test

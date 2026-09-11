@@ -23,12 +23,12 @@ class InstancesHumanFormatterTest {
 
     @Test
     void singleInstance_showsPidAndPaths() {
-        TomcatInstance inst = new TomcatInstance(12345,
-                Path.of("/opt/tomcat"), Path.of("/opt/tomcat/base"));
+        Path home = Path.of("/opt/tomcat");
+        TomcatInstance inst = new TomcatInstance(12345, home, Path.of("/opt/tomcat/base"));
         String out = formatter.format(List.of(inst));
 
         assertThat(out).contains("12345");
-        assertThat(out).contains("/opt/tomcat");
+        assertThat(out).contains(home.toString());
         assertThat(out).contains("CATALINA_HOME");
         assertThat(out).contains("CATALINA_BASE");
     }
