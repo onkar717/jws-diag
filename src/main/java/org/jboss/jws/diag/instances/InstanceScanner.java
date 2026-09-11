@@ -80,7 +80,27 @@ public final class InstanceScanner {
         Path home = extractPath(args, "catalina.home");
         Path base = extractPath(args, "catalina.base");
         if (base == null) base = home;
-        return new TomcatInstance(pid, home, base);
+        String catalinaOut = readEnvironmentValue(pidDir.resolve("environ"), "CATALINA_OUT");
+        return new TomcatInstance(pid, home, base, catalinaOut);
+    }
+
+    // /proc/<pid>/environ is normally readable only by the process owner. When it
+    // cannot be read the value is unknown, which callers treat the same as unset.
+    private static String readEnvironmentValue(Path environFile, String name) {
+        if (!Files.isReadable(environFile)) return null;
+        byte[] bytes;
+        try {
+            bytes = Files.readAllBytes(environFile);
+        } catch (IOException e) {
+            return null;
+        }
+        String prefix = name + "=";
+        for (String entry : splitNullByte(bytes)) {
+            if (entry.startsWith(prefix)) {
+                return entry.substring(prefix.length());
+            }
+        }
+        return null;
     }
 
     private static List<String> splitNullByte(byte[] bytes) {

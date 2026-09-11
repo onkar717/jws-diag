@@ -148,4 +148,46 @@ class InstanceScannerTest {
         assertThat(instances).hasSize(1);
         assertThat(instances.get(0).getPid()).isEqualTo(400);
     }
+
+    @Test
+    void catalinaOut_readFromProcessEnvironment() throws IOException {
+        createTomcatProcess("1001");
+        writeEnviron("1001", "PATH=/usr/bin", "CATALINA_OUT=/dev/stdout", "LANG=C");
+
+        TomcatInstance instance = new InstanceScanner(proc).scan().get(0);
+
+        assertThat(instance.getCatalinaOut()).isEqualTo("/dev/stdout");
+    }
+
+    @Test
+    void catalinaOut_nullWhenNotExported() throws IOException {
+        createTomcatProcess("1001");
+        writeEnviron("1001", "PATH=/usr/bin", "LANG=C");
+
+        assertThat(new InstanceScanner(proc).scan().get(0).getCatalinaOut()).isNull();
+    }
+
+    @Test
+    void catalinaOut_nullWhenEnvironUnavailable_instanceStillDetected() throws IOException {
+        createTomcatProcess("1001");
+
+        List<TomcatInstance> instances = new InstanceScanner(proc).scan();
+
+        assertThat(instances).hasSize(1);
+        assertThat(instances.get(0).getCatalinaOut()).isNull();
+    }
+
+    private void createTomcatProcess(String pid) throws IOException {
+        Path home = dir("tomcat-home-" + pid);
+        createProcess(pid, cmdline(
+                "/usr/bin/java",
+                "-Dcatalina.home=" + home,
+                "org.apache.catalina.startup.Bootstrap", "start"
+        ));
+    }
+
+    // environ uses the same NUL-separated layout as cmdline.
+    private void writeEnviron(String pid, String... entries) throws IOException {
+        Files.write(proc.resolve(pid).resolve("environ"), cmdline(entries));
+    }
 }

@@ -47,6 +47,12 @@ public class LogsCommand implements Runnable {
 
     @Override
     public void run() {
+        if (all && logFile != null) {
+            System.err.println("ERROR: --log-file cannot be combined with --all. "
+                    + "Each instance's log file is resolved from its own CATALINA_BASE.");
+            System.exit(ExitCodes.ERRORS);
+            return;
+        }
         if (all) {
             runMulti();
         } else {
@@ -106,12 +112,12 @@ public class LogsCommand implements Runnable {
                 System.err.println("WARN: Skipping PID " + inst.getPid() + ": no CATALINA_BASE");
                 continue;
             }
-            Path logPath = base.resolve("logs/catalina.out");
-            if (!Files.exists(logPath)) {
-                System.err.println("WARN: Skipping PID " + inst.getPid()
-                        + ": log file not found: " + logPath);
+            LogFileResolver.Resolution resolution = LogFileResolver.resolve(base, inst.getCatalinaOut());
+            if (!resolution.isFound()) {
+                System.err.println("WARN: Skipping PID " + inst.getPid() + ": " + resolution.getSkipReason());
                 continue;
             }
+            Path logPath = resolution.getLogFile();
             try {
                 LogScanResult scanResult = scanner.scan(logPath);
                 results.add(new InstanceLogResult(inst.getPid(), logPath, scanResult));
